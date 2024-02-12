@@ -8,16 +8,21 @@
 
 import UIKit
 
+@available(iOS 16.0, *)
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
     
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appending(component: "Items.plist")
     
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        
+        
         
         var newItem = Item()
         newItem.title = "Eat"
@@ -30,10 +35,11 @@ class TodoListViewController: UITableViewController {
         var newItem3 = Item()
         newItem3.title = "Finish Tasks"
         itemArray.append(newItem3)
-//        if let items = defaults.array(forKey: "TodoListArray") as? [String]
-//        {
-//            itemArray = items
-//        }
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item]
+        {
+            itemArray = items
+        }
     }
     
     //MARK: - Table View DataSource Methods
@@ -47,13 +53,7 @@ class TodoListViewController: UITableViewController {
         let item = itemArray[indexPath.row]
         cell.textLabel?.text = item.title
         
-        if item.done
-        {
-            cell.accessoryType = .checkmark
-        }
-        else{
-            cell.accessoryType = .none
-        }
+        cell.accessoryType = item.done ? .checkmark : .none
        
         return cell
     }
@@ -79,7 +79,16 @@ class TodoListViewController: UITableViewController {
             newItem.title = textField.text!
             self.itemArray.append(newItem)
             
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            
+            let encoder = PropertyListEncoder()
+            do {
+                let data = try encoder.encode(self.itemArray)
+                try data.write(to: self.dataFilePath!)
+            }
+            catch
+            {
+                print(error)
+            }
             self.tableView.reloadData()
         }
         
