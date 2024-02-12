@@ -62,7 +62,7 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        tableView.reloadData()
+        saveItems()
         self.tableView.deselectRow(at: indexPath, animated: true)
         
         
@@ -80,16 +80,8 @@ class TodoListViewController: UITableViewController {
             self.itemArray.append(newItem)
             
             
-            let encoder = PropertyListEncoder()
-            do {
-                let data = try encoder.encode(self.itemArray)
-                try data.write(to: self.dataFilePath!)
-            }
-            catch
-            {
-                print(error)
-            }
-            self.tableView.reloadData()
+            self.saveItems()
+            
         }
         
         alert.addTextField() { (alertTextField) in
@@ -99,6 +91,20 @@ class TodoListViewController: UITableViewController {
         }
         alert.addAction(action)
         present(alert, animated: true , completion: nil)
+    }
+    //MARK: - Model Manipulation Methods
+    func saveItems()
+    {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to:dataFilePath!)
+        }
+        catch
+        {
+            print(error)
+        }
+        self.tableView.reloadData()
     }
     
 }
